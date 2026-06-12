@@ -14,7 +14,12 @@ export default function Index() {
   const [activePage, setActivePage] = useState("home");
   const [commentsItem, setCommentsItem] = useState<NewsItem | null>(null);
   const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
-  const { news, loading, error, lastUpdated, refetch } = useNews();
+
+  const {
+    news, loading, error, lastUpdated, refetch,
+    liveEnabled, toggleLive, newCount, dismissNew,
+    nextScanIn, formatCountdown,
+  } = useNews();
 
   const handleToggleSave = (id: number) => {
     setSavedIds(prev => {
@@ -48,7 +53,34 @@ export default function Index() {
             </div>
           )}
 
-          {activePage === "home" && <HomePage {...sharedProps} refetch={refetch} lastUpdated={lastUpdated} />}
+          {/* New items toast — появляется когда live mode поймал новые */}
+          {newCount > 0 && (
+            <div
+              className="mb-4 flex items-center justify-between px-4 py-2.5 text-[11px] animate-fade-in cursor-pointer"
+              style={{ backgroundColor: "#141414", color: "#ece8df" }}
+              onClick={() => { dismissNew(); refetch(); }}
+            >
+              <span>↑ Появилось {newCount} новых материалов — нажмите, чтобы загрузить</span>
+              <button
+                onClick={e => { e.stopPropagation(); dismissNew(); }}
+                className="opacity-60 hover:opacity-100 transition-opacity ml-4"
+              >
+                <Icon name="X" size={12} />
+              </button>
+            </div>
+          )}
+
+          {activePage === "home" && (
+            <HomePage
+              {...sharedProps}
+              refetch={refetch}
+              lastUpdated={lastUpdated}
+              liveEnabled={liveEnabled}
+              toggleLive={toggleLive}
+              nextScanIn={nextScanIn}
+              formatCountdown={formatCountdown}
+            />
+          )}
           {activePage === "trending" && <TrendingPage {...sharedProps} />}
           {activePage === "search" && <SearchPage {...sharedProps} />}
           {activePage === "saved" && <SavedPage {...sharedProps} />}

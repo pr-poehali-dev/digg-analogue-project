@@ -11,6 +11,10 @@ interface HomePageProps {
   loading: boolean;
   refetch: () => void;
   lastUpdated: Date | null;
+  liveEnabled: boolean;
+  toggleLive: () => void;
+  nextScanIn: number;
+  formatCountdown: (ms: number) => string;
 }
 
 const CATEGORIES_MAP: Record<string, string> = {
@@ -34,7 +38,7 @@ function SkeletonItem({ index }: { index: number }) {
   );
 }
 
-export default function HomePage({ onOpenComments, savedIds, onToggleSave, news, loading, refetch, lastUpdated }: HomePageProps) {
+export default function HomePage({ onOpenComments, savedIds, onToggleSave, news, loading, refetch, lastUpdated, liveEnabled, toggleLive, nextScanIn, formatCountdown }: HomePageProps) {
   const [activeCategory, setActiveCategory] = useState("Все");
 
   const allCategories = ["Все", ...Array.from(new Set(news.map(n => n.category))).sort()];
@@ -97,6 +101,33 @@ export default function HomePage({ onOpenComments, savedIds, onToggleSave, news,
                   7 ДНЕЙ НАЗАД
                 </button>
               </div>
+            </div>
+
+            {/* Live broadcast row */}
+            <div className="flex items-center gap-2 mt-3">
+              <button
+                onClick={toggleLive}
+                className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider transition-all"
+                style={{
+                  color: liveEnabled ? "#c04030" : "#888",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full"
+                  style={{
+                    backgroundColor: liveEnabled ? "#c04030" : "#bbb",
+                    boxShadow: liveEnabled ? "0 0 0 3px rgba(192,64,48,0.2)" : "none",
+                    animation: liveEnabled ? "livePulse 1.4s ease-in-out infinite" : "none",
+                  }}
+                />
+                {liveEnabled ? "ПРЯМАЯ ТРАНСЛЯЦИЯ" : "[+] ПРЯМАЯ ТРАНСЛЯЦИЯ"}
+              </button>
+              {liveEnabled && (
+                <span className="text-[10px] font-mono" style={{ color: "#aaa" }}>
+                  СЛЕДУЮЩЕЕ СКАНИРОВАНИЕ: {formatCountdown(nextScanIn)}
+                </span>
+              )}
             </div>
 
             {/* Category filter */}
