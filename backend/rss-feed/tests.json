@@ -1,0 +1,10 @@
+{
+  "tests": [
+    {
+      "name": "Загрузка RSS новостей",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    }
+  ]
+}

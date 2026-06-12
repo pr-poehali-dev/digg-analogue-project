@@ -6,12 +6,15 @@ import TrendingPage from "@/pages/TrendingPage";
 import SearchPage from "@/pages/SearchPage";
 import SavedPage from "@/pages/SavedPage";
 import ProfilePage from "@/pages/ProfilePage";
+import { useNews } from "@/hooks/useNews";
 import type { NewsItem } from "@/data/news";
+import Icon from "@/components/ui/icon";
 
 export default function Index() {
   const [activePage, setActivePage] = useState("home");
   const [commentsItem, setCommentsItem] = useState<NewsItem | null>(null);
   const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
+  const { news, loading, error, lastUpdated, refetch } = useNews();
 
   const handleToggleSave = (id: number) => {
     setSavedIds(prev => {
@@ -26,13 +29,23 @@ export default function Index() {
     onOpenComments: (item: NewsItem) => setCommentsItem(item),
     savedIds,
     onToggleSave: handleToggleSave,
+    news,
+    loading,
   };
 
   return (
     <>
       <Layout activePage={activePage} onNavigate={setActivePage}>
         <div className="pb-16 md:pb-0">
-          {activePage === "home" && <HomePage {...sharedProps} />}
+          {/* Error banner */}
+          {error && (
+            <div className="mb-4 flex items-center gap-2 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[12px] text-amber-700">
+              <Icon name="AlertCircle" size={14} />
+              {error}
+            </div>
+          )}
+
+          {activePage === "home" && <HomePage {...sharedProps} refetch={refetch} lastUpdated={lastUpdated} />}
           {activePage === "trending" && <TrendingPage {...sharedProps} />}
           {activePage === "search" && <SearchPage {...sharedProps} />}
           {activePage === "saved" && <SavedPage {...sharedProps} />}
