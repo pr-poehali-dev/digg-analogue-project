@@ -1,5 +1,5 @@
 import { useState } from "react";
-import NewsCard from "@/components/NewsCard";
+import DiggNewsItem from "@/components/DiggNewsItem";
 import type { NewsItem } from "@/data/news";
 import Icon from "@/components/ui/icon";
 
@@ -17,113 +17,103 @@ export default function TrendingPage({ onOpenComments, savedIds, onToggleSave, n
   const [period, setPeriod] = useState("Сегодня");
 
   const sorted = [...news].sort((a, b) => b.upvotes - a.upvotes);
-
-  if (loading) {
-    return (
-      <div className="animate-fade-in space-y-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="space-y-2">
-            <div className="h-7 w-36 bg-[hsl(var(--muted))] rounded animate-pulse" />
-            <div className="h-4 w-52 bg-[hsl(var(--muted))] rounded animate-pulse" />
-          </div>
-          <div className="h-9 w-48 bg-[hsl(var(--muted))] rounded-lg animate-pulse" />
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white border border-[hsl(var(--border))] rounded-lg p-4 animate-pulse space-y-2">
-              <div className="h-6 w-8 bg-[hsl(var(--muted))] rounded" />
-              <div className="h-4 w-full bg-[hsl(var(--muted))] rounded" />
-              <div className="h-4 w-3/4 bg-[hsl(var(--muted))] rounded" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const top3 = sorted.slice(0, 3);
+  const rest = sorted.slice(3);
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-serif-custom text-2xl font-semibold text-[hsl(var(--foreground))]">
-            Популярное
-          </h1>
-          <p className="text-[13px] text-[hsl(var(--muted-foreground))] mt-0.5">
-            {news.length} материалов из реальных источников
-          </p>
-        </div>
-        <div className="flex items-center gap-1 bg-white border border-[hsl(var(--border))] rounded-lg p-1">
-          {PERIODS.map(p => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`px-3 py-1.5 rounded text-[12px] font-medium transition-all ${
-                period === p
-                  ? "bg-[hsl(var(--foreground))] text-white"
-                  : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
+      {/* Header */}
+      <div className="mb-6 pb-4" style={{ borderBottom: "1px solid #d4cfc4" }}>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="font-serif-custom text-[1.35rem] font-semibold" style={{ color: "#141414" }}>
+              Рейтинги
+            </h1>
+            <p className="text-[12px] mt-0.5" style={{ color: "#999" }}>
+              Самые популярные материалы
+            </p>
+          </div>
+          <div className="flex items-center gap-0" style={{ border: "1px solid #ccc" }}>
+            {PERIODS.map(p => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider transition-colors"
+                style={{
+                  backgroundColor: period === p ? "#141414" : "transparent",
+                  color: period === p ? "#ece8df" : "#888",
+                  letterSpacing: "0.07em",
+                }}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {sorted.length === 0 ? (
-        <div className="flex flex-col items-center py-20 text-[hsl(var(--muted-foreground))]">
-          <Icon name="TrendingUp" size={36} />
-          <p className="text-[14px] mt-3">Загружаем рейтинг...</p>
+      {loading ? (
+        <div className="space-y-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex gap-4 py-4 animate-pulse" style={{ borderBottom: "1px solid #d4cfc4" }}>
+              <div className="font-serif-custom text-[1.1rem]" style={{ color: "#ccc", minWidth: "1.5rem" }}>{i + 1}</div>
+              <div className="flex-1 space-y-2">
+                <div className="h-5 rounded" style={{ backgroundColor: "#d4cfc4", width: "80%" }} />
+                <div className="h-4 rounded" style={{ backgroundColor: "#d4cfc4", width: "50%" }} />
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <>
           {/* Top 3 podium */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            {sorted.slice(0, 3).map((item, i) => (
-              <div
-                key={item.id}
-                className={`bg-white border border-[hsl(var(--border))] rounded-lg p-4 cursor-pointer hover-lift ${
-                  i === 0 ? "border-orange-200 bg-orange-50/30" : ""
-                }`}
-                onClick={() => onOpenComments(item)}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={`text-2xl font-bold ${
-                    i === 0 ? "text-orange-400" : i === 1 ? "text-gray-400" : "text-amber-600"
-                  }`}>
-                    #{i + 1}
-                  </span>
-                  {i === 0 && <Icon name="Crown" size={16} className="text-orange-400" />}
-                </div>
-                <p className="text-[12px] font-semibold text-[hsl(var(--foreground))] leading-snug line-clamp-3 mb-2">
-                  {item.title}
-                </p>
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))] mb-1">{item.source}</p>
-                {item.upvotes > 0 && (
-                  <div className="flex items-center gap-1 text-[11px] text-orange-600">
-                    <Icon name="ArrowUp" size={11} />
-                    <span className="font-semibold">{item.upvotes.toLocaleString()}</span>
+          {top3.length > 0 && (
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {top3.map((item, i) => (
+                <div
+                  key={item.id}
+                  className="p-4 cursor-pointer hover:opacity-80 transition-opacity"
+                  style={{
+                    backgroundColor: i === 0 ? "#e0dace" : "#e4dfd4",
+                    border: "1px solid #d4cfc4",
+                  }}
+                  onClick={() => onOpenComments(item)}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className="font-serif-custom text-2xl font-bold"
+                      style={{ color: i === 0 ? "#c8a060" : "#bbb" }}
+                    >
+                      #{i + 1}
+                    </span>
+                    {i === 0 && <Icon name="Crown" size={14} style={{ color: "#c8a060" }} />}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Full list */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {sorted.slice(3).map((item, i) => (
-              <div key={item.id} className="relative">
-                <span className="absolute -left-1 top-4 text-[11px] font-bold text-[hsl(var(--border))] w-6 text-center z-10">
-                  #{i + 4}
-                </span>
-                <div className="ml-5">
-                  <NewsCard
-                    item={item}
-                    onOpenComments={onOpenComments}
-                    isSaved={savedIds.has(item.id)}
-                    onToggleSave={onToggleSave}
-                  />
+                  <p className="font-serif-custom text-[12px] font-semibold leading-snug line-clamp-3 mb-2" style={{ color: "#141414" }}>
+                    {item.title}
+                  </p>
+                  <p className="text-[11px]" style={{ color: "#999" }}>{item.source}</p>
+                  {item.upvotes > 0 && (
+                    <div className="flex items-center gap-1 mt-1.5 text-[11px]" style={{ color: "#c06040" }}>
+                      <Icon name="Heart" size={11} />
+                      {item.upvotes.toLocaleString()}
+                    </div>
+                  )}
                 </div>
-              </div>
+              ))}
+            </div>
+          )}
+
+          {/* Rest list */}
+          <div>
+            {rest.map((item, i) => (
+              <DiggNewsItem
+                key={item.id}
+                item={item}
+                index={i + 4}
+                onOpenComments={onOpenComments}
+                isSaved={savedIds.has(item.id)}
+                onToggleSave={onToggleSave}
+              />
             ))}
           </div>
         </>

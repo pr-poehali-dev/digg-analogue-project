@@ -29,60 +29,68 @@ export default function CommentsPanel({ item, onClose }: CommentsPanelProps) {
     setText("");
   };
 
-  const toggleLike = (id: number) => {
-    setLikedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
   return (
     <>
-      {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/30 z-40 animate-fade-in"
+        className="fixed inset-0 z-40"
+        style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
         onClick={onClose}
       />
-
-      {/* Panel */}
-      <div className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white z-50 flex flex-col shadow-2xl animate-slide-in-right">
+      <div
+        className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 flex flex-col animate-slide-in-right"
+        style={{ backgroundColor: "#ece8df", borderLeft: "1px solid #d4cfc4" }}
+      >
         {/* Header */}
-        <div className="flex items-start justify-between p-5 border-b border-[hsl(var(--border))]">
+        <div className="flex items-start justify-between p-5" style={{ borderBottom: "1px solid #d4cfc4" }}>
           <div className="flex-1 pr-4">
-            <p className="text-[11px] text-[hsl(var(--muted-foreground))] mb-1">{item.source} · {item.time}</p>
-            <h3 className="font-serif-custom text-[15px] font-semibold leading-snug text-[hsl(var(--foreground))]">
+            <p className="text-[10px] uppercase tracking-widest mb-1.5" style={{ color: "#999" }}>
+              {item.source} · {item.time}
+            </p>
+            <h3 className="font-serif-custom text-[14px] font-semibold leading-snug" style={{ color: "#141414" }}>
               {item.title}
             </h3>
+            {item.sourceUrl && item.sourceUrl !== "#" && (
+              <a
+                href={item.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-[11px] mt-2 hover:opacity-60 transition-opacity"
+                style={{ color: "#888" }}
+              >
+                <Icon name="ExternalLink" size={11} />
+                Читать оригинал
+              </a>
+            )}
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded hover:bg-[hsl(var(--muted))] transition-colors flex-shrink-0"
-          >
+          <button onClick={onClose} className="hover:opacity-60 transition-opacity" style={{ color: "#888" }}>
             <Icon name="X" size={16} />
           </button>
         </div>
 
-        {/* Comment form */}
-        <form onSubmit={handleSubmit} className="p-4 border-b border-[hsl(var(--border))]">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-[hsl(var(--muted))] flex items-center justify-center flex-shrink-0 text-[12px] font-semibold text-[hsl(var(--muted-foreground))]">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-4" style={{ borderBottom: "1px solid #d4cfc4" }}>
+          <div className="flex gap-3">
+            <div
+              className="w-7 h-7 flex-shrink-0 flex items-center justify-center text-[10px] font-bold font-serif-custom"
+              style={{ backgroundColor: "#d4cfc4", color: "#888" }}
+            >
               Y
             </div>
             <div className="flex-1">
               <textarea
                 value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Поделитесь мнением..."
+                onChange={e => setText(e.target.value)}
+                placeholder="Ваш комментарий..."
                 rows={2}
-                className="w-full text-[13px] text-[hsl(var(--foreground))] placeholder-[hsl(var(--muted-foreground))] bg-[hsl(var(--muted))] rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-1 focus:ring-[hsl(var(--ring))] transition"
+                className="w-full text-[13px] px-3 py-2 resize-none focus:outline-none"
+                style={{ backgroundColor: "#e4dfd4", border: "1px solid #d4cfc4", color: "#141414", fontFamily: "inherit" }}
               />
-              <div className="flex justify-end mt-2">
+              <div className="flex justify-end mt-1.5">
                 <button
                   type="submit"
                   disabled={!text.trim()}
-                  className="px-4 py-1.5 text-[12px] font-medium bg-[hsl(var(--foreground))] text-white rounded transition-opacity disabled:opacity-40 hover:opacity-80"
+                  className="px-4 py-1.5 text-[10px] font-medium uppercase tracking-widest disabled:opacity-40"
+                  style={{ backgroundColor: "#141414", color: "#ece8df" }}
                 >
                   Отправить
                 </button>
@@ -91,40 +99,53 @@ export default function CommentsPanel({ item, onClose }: CommentsPanelProps) {
           </div>
         </form>
 
-        {/* Comments list */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {comments.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 text-[hsl(var(--muted-foreground))]">
-              <Icon name="MessageCircle" size={32} />
-              <p className="text-[13px] mt-3">Пока нет комментариев</p>
-              <p className="text-[12px] mt-1">Будьте первым!</p>
+        {/* Count */}
+        <div className="px-5 py-2.5" style={{ borderBottom: "1px solid #d4cfc4" }}>
+          <span className="text-[10px] uppercase tracking-widest" style={{ color: "#999" }}>
+            Комментарии · {comments.length}
+          </span>
+        </div>
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto">
+          {comments.length === 0 ? (
+            <div className="flex flex-col items-center py-12" style={{ color: "#bbb" }}>
+              <Icon name="MessageCircle" size={28} />
+              <p className="text-[12px] mt-3">Пока нет комментариев</p>
             </div>
-          )}
-          {comments.map((c) => (
-            <div key={c.id} className="flex gap-3 animate-fade-in">
-              <div className="w-7 h-7 rounded-full bg-[hsl(var(--muted))] flex items-center justify-center flex-shrink-0 text-[11px] font-semibold text-[hsl(var(--muted-foreground))]">
-                {c.avatar}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[12px] font-semibold text-[hsl(var(--foreground))]">@{c.author}</span>
-                  <span className="text-[11px] text-[hsl(var(--muted-foreground))]">{c.time}</span>
-                </div>
-                <p className="text-[13px] text-[hsl(var(--foreground))] leading-relaxed">{c.text}</p>
-                <button
-                  onClick={() => toggleLike(c.id)}
-                  className={`flex items-center gap-1 mt-2 text-[11px] transition-colors ${
-                    likedIds.has(c.id)
-                      ? "text-orange-500"
-                      : "text-[hsl(var(--muted-foreground))] hover:text-orange-500"
-                  }`}
+          ) : (
+            comments.map(c => (
+              <div key={c.id} className="flex gap-3 px-5 py-4 animate-fade-in" style={{ borderBottom: "1px solid #e0dbd0" }}>
+                <div
+                  className="w-6 h-6 flex-shrink-0 flex items-center justify-center text-[10px] font-bold font-serif-custom"
+                  style={{ backgroundColor: "#d4cfc4", color: "#888" }}
                 >
-                  <Icon name="Heart" size={12} />
-                  {c.likes + (likedIds.has(c.id) ? 1 : 0)}
-                </button>
+                  {c.avatar}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[11px] font-semibold" style={{ color: "#141414" }}>@{c.author}</span>
+                    <span className="text-[10px]" style={{ color: "#bbb" }}>{c.time}</span>
+                  </div>
+                  <p className="text-[13px] leading-relaxed" style={{ color: "#333" }}>{c.text}</p>
+                  <button
+                    onClick={() => {
+                      setLikedIds(prev => {
+                        const next = new Set(prev);
+                        if (next.has(c.id)) { next.delete(c.id); } else { next.add(c.id); }
+                        return next;
+                      });
+                    }}
+                    className="flex items-center gap-1 mt-1.5 text-[10px] transition-colors"
+                    style={{ color: likedIds.has(c.id) ? "#c44" : "#bbb" }}
+                  >
+                    <Icon name="Heart" size={11} />
+                    {c.likes + (likedIds.has(c.id) ? 1 : 0)}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </>

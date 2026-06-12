@@ -1,6 +1,5 @@
 import { useState } from "react";
-import NewsCard from "@/components/NewsCard";
-import { CATEGORIES } from "@/data/news";
+import DiggNewsItem from "@/components/DiggNewsItem";
 import type { NewsItem } from "@/data/news";
 import Icon from "@/components/ui/icon";
 
@@ -14,36 +13,22 @@ interface HomePageProps {
   lastUpdated: Date | null;
 }
 
-function SkeletonCard() {
-  return (
-    <div className="bg-white border border-[hsl(var(--border))] rounded-lg p-6 animate-pulse">
-      <div className="flex gap-2 mb-3">
-        <div className="h-5 w-14 bg-[hsl(var(--muted))] rounded-full" />
-        <div className="h-5 w-20 bg-[hsl(var(--muted))] rounded-full" />
-      </div>
-      <div className="h-6 w-full bg-[hsl(var(--muted))] rounded mb-2" />
-      <div className="h-6 w-3/4 bg-[hsl(var(--muted))] rounded mb-4" />
-      <div className="h-4 w-full bg-[hsl(var(--muted))] rounded mb-1" />
-      <div className="h-4 w-2/3 bg-[hsl(var(--muted))] rounded" />
-    </div>
-  );
-}
+const CATEGORIES_MAP: Record<string, string> = {
+  AI: "ИИ", Hardware: "Железо", Space: "Космос", OS: "ОС",
+  Browsers: "Браузеры", Quantum: "Квантум", Robotics: "Роботы",
+  Tech: "Технологии", Startups: "Стартапы", Security: "Безопасность", EV: "Электромобили",
+};
 
-function SkeletonRow() {
+function SkeletonItem({ index }: { index: number }) {
   return (
-    <div className="flex gap-4 py-4 border-b border-[hsl(var(--border))] last:border-0 animate-pulse">
-      <div className="w-10 flex flex-col items-center gap-1 pt-1">
-        <div className="h-4 w-4 bg-[hsl(var(--muted))] rounded" />
-        <div className="h-3 w-6 bg-[hsl(var(--muted))] rounded" />
-      </div>
-      <div className="flex-1 space-y-2">
-        <div className="flex gap-2">
-          <div className="h-4 w-12 bg-[hsl(var(--muted))] rounded-full" />
-          <div className="h-4 w-20 bg-[hsl(var(--muted))] rounded-full" />
+    <div className="py-5 animate-pulse" style={{ borderBottom: "1px solid #d4cfc4" }}>
+      <div className="flex gap-4">
+        <span className="font-serif-custom text-[1.1rem]" style={{ color: "#ccc", minWidth: "1.5rem" }}>{index}</span>
+        <div className="flex-1 space-y-2">
+          <div className="h-5 rounded" style={{ backgroundColor: "#d4cfc4", width: "85%" }} />
+          <div className="h-5 rounded" style={{ backgroundColor: "#d4cfc4", width: "55%" }} />
+          <div className="h-3 rounded mt-1" style={{ backgroundColor: "#d4cfc4", width: "40%" }} />
         </div>
-        <div className="h-4 w-full bg-[hsl(var(--muted))] rounded" />
-        <div className="h-4 w-4/5 bg-[hsl(var(--muted))] rounded" />
-        <div className="h-3 w-1/2 bg-[hsl(var(--muted))] rounded" />
       </div>
     </div>
   );
@@ -53,202 +38,235 @@ export default function HomePage({ onOpenComments, savedIds, onToggleSave, news,
   const [activeCategory, setActiveCategory] = useState("Все");
 
   const allCategories = ["Все", ...Array.from(new Set(news.map(n => n.category))).sort()];
-  const cats = allCategories.length > 1 ? allCategories : CATEGORIES;
 
-  const filtered = activeCategory === "Все"
-    ? news
-    : news.filter(n => n.category === activeCategory);
+  const filtered = activeCategory === "Все" ? news : news.filter(n => n.category === activeCategory);
+  const topStory = filtered[0];
+  const mainList = filtered.slice(1);
+  const trendingItems = news.slice(0, 5);
+  const sources = Array.from(new Set(news.map(n => n.source))).slice(0, 6);
 
-  const featured = filtered[0];
-  const rest = filtered.slice(1);
-  const trendingItems = news.filter(n => n.trending).slice(0, 4);
+  const todayDate = new Date().toLocaleDateString("ru-RU", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
 
   return (
     <div className="animate-fade-in">
-      {/* Top bar: categories + refresh */}
-      <div className="flex items-center justify-between gap-3 mb-6">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-1">
-          {cats.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all ${
-                activeCategory === cat
-                  ? "bg-[hsl(var(--foreground))] text-white"
-                  : "bg-white border border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] hover:border-[hsl(var(--foreground))] hover:text-[hsl(var(--foreground))]"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-        <button
-          onClick={refetch}
-          disabled={loading}
-          title={lastUpdated ? `Обновлено: ${lastUpdated.toLocaleTimeString('ru')}` : "Обновить"}
-          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium bg-white border border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))] hover:border-[hsl(var(--foreground))] hover:text-[hsl(var(--foreground))] transition-all disabled:opacity-50"
-        >
-          <Icon name="RefreshCw" size={12} className={loading ? "animate-spin" : ""} />
-          {lastUpdated ? lastUpdated.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }) : "Обновить"}
-        </button>
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_272px] gap-10">
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main feed */}
-        <div className="lg:col-span-2 space-y-4">
-          {loading ? (
-            <>
-              <SkeletonCard />
-              <div className="bg-white border border-[hsl(var(--border))] rounded-lg px-5">
-                {[...Array(4)].map((_, i) => <SkeletonRow key={i} />)}
-              </div>
-            </>
-          ) : (
-            <>
-              {featured && (
-                <NewsCard
-                  item={featured}
-                  variant="featured"
-                  onOpenComments={onOpenComments}
-                  isSaved={savedIds.has(featured.id)}
-                  onToggleSave={onToggleSave}
-                />
-              )}
-              <div className="bg-white border border-[hsl(var(--border))] rounded-lg">
-                <div className="px-5 py-3 border-b border-[hsl(var(--border))] flex items-center justify-between">
-                  <h2 className="text-[12px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
-                    Последние новости
-                  </h2>
-                  <span className="text-[11px] text-[hsl(var(--muted-foreground))]">{rest.length} материалов</span>
-                </div>
-                <div className="px-5">
-                  {rest.length === 0 && (
-                    <p className="py-6 text-[13px] text-center text-[hsl(var(--muted-foreground))]">
-                      Нет новостей в этой категории
-                    </p>
-                  )}
-                  {rest.map((item) => (
-                    <NewsCard
-                      key={item.id}
-                      item={item}
-                      onOpenComments={onOpenComments}
-                      isSaved={savedIds.has(item.id)}
-                      onToggleSave={onToggleSave}
-                    />
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        {/* ── MAIN COLUMN ── */}
+        <div>
+          {/* Page header */}
+          <div className="mb-5 pb-4" style={{ borderBottom: "1px solid #d4cfc4" }}>
+            <h1 className="font-serif-custom text-[1.35rem] font-semibold" style={{ color: "#141414" }}>
+              Главные новости
+            </h1>
+            <p className="text-[13px] capitalize mt-0.5" style={{ color: "#c06040" }}>
+              {todayDate}
+            </p>
 
-        {/* Sidebar */}
-        <aside className="space-y-4">
-          {/* Trending */}
-          <div className="bg-white border border-[hsl(var(--border))] rounded-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-[hsl(var(--border))] flex items-center gap-2">
-              <Icon name="Flame" size={14} className="text-orange-500" />
-              <h3 className="text-[12px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
-                В тренде
-              </h3>
+            <div className="flex flex-wrap items-center justify-between gap-2 mt-3">
+              <div className="flex items-center gap-4">
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: "#999" }}>
+                  ПОСТОВ: <b style={{ color: "#555" }}>{loading ? "—" : news.length}</b>
+                </span>
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: "#999" }}>
+                  ИСТОЧНИКОВ: <b style={{ color: "#555" }}>{loading ? "—" : sources.length}</b>
+                </span>
+                {lastUpdated && (
+                  <span className="text-[10px] uppercase tracking-wider" style={{ color: "#999" }}>
+                    ОБНОВЛЕНО: <b style={{ color: "#555" }}>
+                      {lastUpdated.toLocaleTimeString("ru", { hour: "2-digit", minute: "2-digit" })}
+                    </b>
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  className="text-[10px] font-medium px-3 py-1"
+                  style={{ backgroundColor: "#141414", color: "#ece8df", letterSpacing: "0.06em" }}
+                >
+                  СЕГОДНЯ
+                </button>
+                <button
+                  onClick={refetch}
+                  disabled={loading}
+                  className="flex items-center gap-1 text-[10px] font-medium px-3 py-1 transition-opacity hover:opacity-70 disabled:opacity-40"
+                  style={{ border: "1px solid #ccc", color: "#888", letterSpacing: "0.06em" }}
+                >
+                  <Icon name="RefreshCw" size={10} className={loading ? "animate-spin" : ""} />
+                  7 ДНЕЙ НАЗАД
+                </button>
+              </div>
             </div>
-            <div className="p-2">
-              {loading ? (
-                [...Array(3)].map((_, i) => (
-                  <div key={i} className="flex gap-3 p-2 animate-pulse">
-                    <div className="w-6 h-5 bg-[hsl(var(--muted))] rounded flex-shrink-0" />
-                    <div className="flex-1 space-y-1.5">
-                      <div className="h-3.5 bg-[hsl(var(--muted))] rounded w-full" />
-                      <div className="h-3.5 bg-[hsl(var(--muted))] rounded w-3/4" />
-                      <div className="h-3 bg-[hsl(var(--muted))] rounded w-1/2" />
-                    </div>
-                  </div>
-                ))
-              ) : trendingItems.length > 0 ? (
-                trendingItems.map((item, i) => (
-                  <button
-                    key={item.id}
-                    onClick={() => onOpenComments(item)}
-                    className="w-full flex items-start gap-3 p-2 rounded hover:bg-[hsl(var(--muted))] transition-colors text-left group"
-                  >
-                    <span className="text-[20px] font-bold text-[hsl(var(--border))] leading-none mt-0.5 w-6 flex-shrink-0">
-                      {i + 1}
-                    </span>
-                    <div>
-                      <p className="text-[12px] font-medium text-[hsl(var(--foreground))] leading-snug group-hover:text-[hsl(var(--muted-foreground))] transition-colors line-clamp-2">
-                        {item.title}
-                      </p>
-                      <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">{item.source}</p>
-                    </div>
-                  </button>
-                ))
-              ) : (
-                news.slice(0, 3).map((item, i) => (
-                  <button
-                    key={item.id}
-                    onClick={() => onOpenComments(item)}
-                    className="w-full flex items-start gap-3 p-2 rounded hover:bg-[hsl(var(--muted))] transition-colors text-left group"
-                  >
-                    <span className="text-[20px] font-bold text-[hsl(var(--border))] leading-none mt-0.5 w-6 flex-shrink-0">
-                      {i + 1}
-                    </span>
-                    <div>
-                      <p className="text-[12px] font-medium text-[hsl(var(--foreground))] leading-snug group-hover:text-[hsl(var(--muted-foreground))] transition-colors line-clamp-2">
-                        {item.title}
-                      </p>
-                      <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">{item.source}</p>
-                    </div>
-                  </button>
-                ))
-              )}
+
+            {/* Category filter */}
+            <div className="flex items-center gap-1.5 mt-3 overflow-x-auto pb-1">
+              {allCategories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className="flex-shrink-0 text-[10px] px-2.5 py-1 transition-all"
+                  style={{
+                    backgroundColor: activeCategory === cat ? "#141414" : "transparent",
+                    color: activeCategory === cat ? "#ece8df" : "#888",
+                    border: "1px solid " + (activeCategory === cat ? "#141414" : "#ccc"),
+                    borderRadius: "999px",
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  {cat === "Все" ? "Все" : (CATEGORIES_MAP[cat] || cat)}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="bg-white border border-[hsl(var(--border))] rounded-lg p-4">
-            <h3 className="text-[12px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-3">
-              Сегодня
+          {/* Top story / loading banner */}
+          {loading ? (
+            <div
+              className="mb-5 p-4"
+              style={{ backgroundColor: "#e4dfd4", border: "1px solid #d4cfc4" }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[12px]" style={{ color: "#999" }}>
+                  ☕ В PULSE новый день. Сейчас собираются свежие истории.
+                </span>
+                <span className="text-[11px] font-mono" style={{ color: "#bbb" }}>загрузка...</span>
+              </div>
+              <div className="mt-2 progress-dots" />
+            </div>
+          ) : topStory ? (
+            <div
+              className="mb-5 p-4 cursor-pointer hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: "#e4dfd4", border: "1px solid #d4cfc4" }}
+              onClick={() => onOpenComments(topStory)}
+            >
+              <div className="flex items-center gap-1.5 mb-2">
+                <span style={{ fontSize: "13px" }}>🔥</span>
+                <span className="text-[10px] font-medium uppercase tracking-widest" style={{ color: "#999" }}>
+                  На случай, если вы это пропустили
+                </span>
+              </div>
+              <p className="font-serif-custom text-[1rem] font-semibold leading-snug" style={{ color: "#141414" }}>
+                {topStory.title}
+              </p>
+              {topStory.excerpt && (
+                <p className="text-[12px] mt-1.5 line-clamp-2" style={{ color: "#666" }}>
+                  {topStory.excerpt}
+                </p>
+              )}
+              <div className="flex items-center gap-3 mt-2">
+                <span className="text-[11px]" style={{ color: "#999" }}>{topStory.source}</span>
+                <span className="text-[11px]" style={{ color: "#999" }}>{topStory.time}</span>
+                <span className="tag-pill">{CATEGORIES_MAP[topStory.category] || topStory.category}</span>
+              </div>
+            </div>
+          ) : null}
+
+          {/* News list */}
+          <div>
+            {loading
+              ? [...Array(8)].map((_, i) => <SkeletonItem key={i} index={i + 1} />)
+              : mainList.map((item, i) => (
+                  <DiggNewsItem
+                    key={item.id}
+                    item={item}
+                    index={i + 2}
+                    onOpenComments={onOpenComments}
+                    isSaved={savedIds.has(item.id)}
+                    onToggleSave={onToggleSave}
+                  />
+                ))
+            }
+          </div>
+        </div>
+
+        {/* ── SIDEBAR ── */}
+        <aside className="hidden lg:block space-y-7">
+          {/* Trending */}
+          <div>
+            <h3 className="text-[10px] font-semibold uppercase tracking-widest mb-4" style={{ color: "#999" }}>
+              Недавние звёзды
             </h3>
-            <div className="space-y-3">
-              {[
-                { label: "Новостей", value: news.length, icon: "FileText" },
-                { label: "Источников", value: new Set(news.map(n => n.source)).size, icon: "Globe" },
-                { label: "Категорий", value: new Set(news.map(n => n.category)).size, icon: "Tag" },
-              ].map(stat => (
-                <div key={stat.label} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[12px] text-[hsl(var(--muted-foreground))]">
-                    <Icon name={stat.icon} size={13} />
-                    {stat.label}
+            <div className="space-y-4">
+              {trendingItems.map((item, i) => (
+                <div key={item.id}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-[10px] font-mono" style={{ color: "#aaa" }}>{item.source}</span>
+                    <span style={{ color: "#ccc", fontSize: "9px" }}>·</span>
+                    <span className="text-[10px]" style={{ color: "#aaa" }}>{item.time}</span>
                   </div>
-                  <span className="text-[14px] font-semibold text-[hsl(var(--foreground))]">
-                    {loading ? "—" : stat.value}
-                  </span>
+                  <div
+                    className="flex items-start gap-2.5 p-2.5 cursor-pointer hover:opacity-75 transition-opacity"
+                    style={{ backgroundColor: "#e4dfd4", border: "1px solid #d4cfc4" }}
+                    onClick={() => onOpenComments(item)}
+                  >
+                    <div
+                      className="flex-shrink-0 w-9 h-9 flex items-center justify-center text-[12px] font-bold font-serif-custom"
+                      style={{ backgroundColor: "#d0cbbf", color: "#777" }}
+                    >
+                      {i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-semibold leading-snug line-clamp-2 font-serif-custom" style={{ color: "#141414" }}>
+                        {item.title}
+                      </p>
+                      {item.upvotes > 0 && (
+                        <p className="text-[10px] mt-1" style={{ color: "#aaa" }}>
+                          {item.upvotes.toLocaleString()} звёзд
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Sources */}
-          {!loading && (
-            <div className="bg-white border border-[hsl(var(--border))] rounded-lg p-4">
-              <h3 className="text-[12px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-3">
-                Источники
-              </h3>
-              <div className="space-y-1.5">
-                {Array.from(new Set(news.map(n => n.source))).slice(0, 6).map(src => {
-                  const count = news.filter(n => n.source === src).length;
-                  return (
-                    <div key={src} className="flex items-center justify-between">
-                      <span className="text-[12px] text-[hsl(var(--foreground))]">{src}</span>
-                      <span className="text-[11px] text-[hsl(var(--muted-foreground))] bg-[hsl(var(--muted))] px-2 py-0.5 rounded-full">
-                        {count}
-                      </span>
-                    </div>
-                  );
-                })}
+          <div>
+            <h3 className="text-[10px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#999" }}>
+              Источники
+            </h3>
+            {sources.map(src => (
+              <div
+                key={src}
+                className="flex items-center justify-between py-2"
+                style={{ borderBottom: "1px solid #d4cfc4" }}
+              >
+                <span className="text-[11px]" style={{ color: "#444" }}>{src}</span>
+                <span
+                  className="text-[10px] font-mono px-1.5 py-0.5"
+                  style={{ backgroundColor: "#d4cfc4", color: "#666" }}
+                >
+                  {news.filter(n => n.source === src).length}
+                </span>
               </div>
+            ))}
+          </div>
+
+          {/* Categories */}
+          <div>
+            <h3 className="text-[10px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#999" }}>
+              Категории
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {allCategories.filter(c => c !== "Все").map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className="text-[10px] px-2 py-1 transition-all"
+                  style={{
+                    backgroundColor: activeCategory === cat ? "#141414" : "transparent",
+                    color: activeCategory === cat ? "#ece8df" : "#888",
+                    border: "1px solid " + (activeCategory === cat ? "#141414" : "#ccc"),
+                    borderRadius: "999px",
+                  }}
+                >
+                  {CATEGORIES_MAP[cat] || cat}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
         </aside>
       </div>
     </div>

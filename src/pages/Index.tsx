@@ -39,8 +39,11 @@ export default function Index() {
         <div className="pb-16 md:pb-0">
           {/* Error banner */}
           {error && (
-            <div className="mb-4 flex items-center gap-2 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-[12px] text-amber-700">
-              <Icon name="AlertCircle" size={14} />
+            <div
+              className="mb-4 flex items-center gap-2 px-4 py-2.5 text-[11px]"
+              style={{ backgroundColor: "#efe8d8", border: "1px solid #d4cfc4", color: "#886040" }}
+            >
+              <Icon name="AlertCircle" size={13} />
               {error}
             </div>
           )}

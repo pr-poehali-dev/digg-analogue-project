@@ -4,43 +4,43 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
+    --background: 40 18% 92%;
     --foreground: 0 0% 8%;
 
-    --card: 0 0% 100%;
+    --card: 40 18% 92%;
     --card-foreground: 0 0% 8%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 8%;
 
-    --primary: 0 0% 10%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 0 0% 8%;
+    --primary-foreground: 40 18% 92%;
 
-    --secondary: 0 0% 95%;
+    --secondary: 40 12% 86%;
     --secondary-foreground: 0 0% 20%;
 
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 48%;
+    --muted: 40 10% 83%;
+    --muted-foreground: 0 0% 42%;
 
-    --accent: 16 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 40 10% 83%;
+    --accent-foreground: 0 0% 8%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 10%;
+    --border: 40 8% 78%;
+    --input: 40 8% 78%;
+    --ring: 0 0% 8%;
 
-    --radius: 0.25rem;
+    --radius: 0.2rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 40 18% 92%;
     --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 0 0% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 94%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 90%;
+    --sidebar-primary: 0 0% 8%;
+    --sidebar-primary-foreground: 40 18% 92%;
+    --sidebar-accent: 40 10% 83%;
+    --sidebar-accent-foreground: 0 0% 8%;
+    --sidebar-border: 40 8% 78%;
     --sidebar-ring: 0 0% 60%;
   }
 }
@@ -51,7 +51,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: #ece8df;
+    color: #141414;
     font-family: "IBM Plex Sans", sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -60,6 +61,22 @@
 @layer utilities {
   .font-serif-custom {
     font-family: "IBM Plex Serif", serif;
+  }
+
+  .bg-cream {
+    background-color: #ece8df;
+  }
+  .bg-cream-card {
+    background-color: #e8e3d9;
+  }
+  .border-cream {
+    border-color: #d4cfc4;
+  }
+  .text-muted-digg {
+    color: #888;
+  }
+  .text-dim {
+    color: #555;
   }
 
   .line-clamp-2 {
@@ -77,13 +94,13 @@
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.4s ease forwards;
+    animation: fadeIn 0.3s ease forwards;
   }
 
   @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(5px);
     }
     to {
       opacity: 1;
@@ -91,48 +108,59 @@
     }
   }
 
-  .animate-slide-up {
-    animation: slideUp 0.3s ease forwards;
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
   }
 
-  @keyframes slideUp {
+  @keyframes slideInRight {
     from {
-      opacity: 0;
-      transform: translateY(16px);
+      transform: translateX(100%);
     }
     to {
-      opacity: 1;
-      transform: translateY(0);
+      transform: translateX(0);
     }
   }
 
-  .hover-lift {
-    transition:
-      transform 0.2s ease,
-      box-shadow 0.2s ease;
+  .digg-title {
+    font-family: "IBM Plex Serif", serif;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: -0.05em;
   }
 
-  .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  .news-num {
+    font-family: "IBM Plex Serif", serif;
+    font-weight: 400;
+    color: #bbb;
+    min-width: 1.5rem;
   }
 
-  .news-link {
-    position: relative;
+  .progress-dots {
+    background: repeating-linear-gradient(
+      90deg,
+      #bbb 0px,
+      #bbb 3px,
+      transparent 3px,
+      transparent 8px
+    );
+    height: 2px;
   }
 
-  .news-link::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: hsl(var(--foreground));
-    transition: width 0.25s ease;
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    background: transparent;
+    border: 1px solid #d4cfc4;
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 11px;
+    color: #666;
+    white-space: nowrap;
   }
 
-  .news-link:hover::after {
-    width: 100%;
+  .tag-pill-filled {
+    background: #141414;
+    color: #ece8df;
+    border-color: #141414;
   }
 }

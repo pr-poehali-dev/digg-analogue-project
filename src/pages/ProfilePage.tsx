@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { NEWS } from "@/data/news";
 import Icon from "@/components/ui/icon";
 
 interface ProfilePageProps {
@@ -9,51 +8,50 @@ interface ProfilePageProps {
 export default function ProfilePage({ savedIds }: ProfilePageProps) {
   const [activeTab, setActiveTab] = useState<"activity" | "settings">("activity");
 
-  const totalComments = NEWS.reduce((a, n) => a + n.comments.length, 0);
-  const totalVotes = NEWS.reduce((a, n) => a + n.upvotes, 0);
-
   const recentActivity = [
-    { icon: "ArrowUp", text: "Вы проголосовали за «OpenAI представила GPT-5»", time: "2 ч. назад", color: "text-orange-500" },
-    { icon: "MessageSquare", text: "Вы прокомментировали «SpaceX запустила Starship»", time: "5 ч. назад", color: "text-blue-500" },
-    { icon: "Bookmark", text: "Сохранено: «Apple анонсировала M4 Ultra»", time: "6 ч. назад", color: "text-green-500" },
-    { icon: "ArrowUp", text: "Вы проголосовали за «Meta открыла Llama 4»", time: "1 д. назад", color: "text-orange-500" },
-    { icon: "MessageSquare", text: "Вы прокомментировали «Tesla представила Optimus 3»", time: "1 д. назад", color: "text-blue-500" },
+    { icon: "Heart", text: "Проголосовали за «OpenAI представила GPT-5»", time: "2 ч. назад", color: "#c44" },
+    { icon: "MessageSquare", text: "Прокомментировали «SpaceX запустила Starship»", time: "5 ч. назад", color: "#448" },
+    { icon: "Bookmark", text: "Сохранено: «Apple анонсировала M4 Ultra»", time: "6 ч. назад", color: "#484" },
+    { icon: "Heart", text: "Проголосовали за «Meta открыла Llama 4»", time: "1 д. назад", color: "#c44" },
+    { icon: "MessageSquare", text: "Прокомментировали «Tesla представила Optimus 3»", time: "1 д. назад", color: "#448" },
+  ];
+
+  const settings = [
+    { label: "Email-уведомления", desc: "Получать дайджест раз в день", icon: "Mail" },
+    { label: "Push-уведомления", desc: "О трендах и новых комментариях", icon: "Bell" },
+    { label: "Компактный вид", desc: "Показывать больше материалов", icon: "AlignJustify" },
+    { label: "Тёмная тема", desc: "Переключить на тёмный интерфейс", icon: "Moon" },
   ];
 
   return (
-    <div className="animate-fade-in max-w-2xl mx-auto">
+    <div className="animate-fade-in max-w-xl">
       {/* Profile header */}
-      <div className="bg-white border border-[hsl(var(--border))] rounded-lg p-6 mb-6">
+      <div className="mb-6 pb-6" style={{ borderBottom: "1px solid #d4cfc4" }}>
         <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-full bg-[hsl(var(--foreground))] flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+          <div
+            className="w-14 h-14 flex items-center justify-center flex-shrink-0 font-serif-custom text-xl font-bold"
+            style={{ backgroundColor: "#141414", color: "#ece8df" }}
+          >
             Y
           </div>
           <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-serif-custom text-xl font-semibold text-[hsl(var(--foreground))]">
-                  @you
-                </h2>
-                <p className="text-[13px] text-[hsl(var(--muted-foreground))] mt-0.5">
-                  Читатель технологических новостей
-                </p>
-              </div>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 border border-[hsl(var(--border))] rounded text-[12px] font-medium text-[hsl(var(--muted-foreground))] hover:border-[hsl(var(--foreground))] hover:text-[hsl(var(--foreground))] transition-colors">
-                <Icon name="Edit3" size={12} />
-                Изменить
-              </button>
-            </div>
+            <h2 className="font-serif-custom text-[1.2rem] font-semibold" style={{ color: "#141414" }}>
+              @you
+            </h2>
+            <p className="text-[12px] mt-0.5" style={{ color: "#999" }}>
+              Читатель технологических новостей
+            </p>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-[hsl(var(--border))]">
+            <div className="flex items-center gap-6 mt-4 pt-4" style={{ borderTop: "1px solid #d4cfc4" }}>
               {[
-                { label: "Сохранено", value: savedIds.size, icon: "Bookmark" },
-                { label: "Комментарии", value: 12, icon: "MessageSquare" },
-                { label: "Голосов", value: 47, icon: "ArrowUp" },
-              ].map(stat => (
-                <div key={stat.label} className="text-center">
-                  <p className="text-xl font-bold text-[hsl(var(--foreground))]">{stat.value}</p>
-                  <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">{stat.label}</p>
+                { label: "Сохранено", value: savedIds.size },
+                { label: "Комментариев", value: 12 },
+                { label: "Голосов", value: 47 },
+              ].map(s => (
+                <div key={s.label}>
+                  <p className="font-serif-custom text-xl font-bold" style={{ color: "#141414" }}>{s.value}</p>
+                  <p className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: "#999" }}>{s.label}</p>
                 </div>
               ))}
             </div>
@@ -62,7 +60,7 @@ export default function ProfilePage({ savedIds }: ProfilePageProps) {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 bg-white border border-[hsl(var(--border))] rounded-lg p-1 w-fit">
+      <div className="flex items-center gap-0 mb-5" style={{ borderBottom: "1px solid #d4cfc4" }}>
         {[
           { id: "activity", label: "Активность" },
           { id: "settings", label: "Настройки" },
@@ -70,11 +68,13 @@ export default function ProfilePage({ savedIds }: ProfilePageProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as "activity" | "settings")}
-            className={`px-4 py-2 rounded text-[13px] font-medium transition-all ${
-              activeTab === tab.id
-                ? "bg-[hsl(var(--foreground))] text-white"
-                : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-            }`}
+            className="px-4 py-2.5 text-[11px] font-medium uppercase tracking-wider transition-colors"
+            style={{
+              color: activeTab === tab.id ? "#141414" : "#999",
+              borderBottom: activeTab === tab.id ? "2px solid #141414" : "2px solid transparent",
+              marginBottom: "-1px",
+              letterSpacing: "0.08em",
+            }}
           >
             {tab.label}
           </button>
@@ -82,58 +82,55 @@ export default function ProfilePage({ savedIds }: ProfilePageProps) {
       </div>
 
       {activeTab === "activity" && (
-        <div className="bg-white border border-[hsl(var(--border))] rounded-lg overflow-hidden">
-          <div className="px-5 py-3 border-b border-[hsl(var(--border))]">
-            <h3 className="text-[12px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
-              Последняя активность
-            </h3>
-          </div>
-          <div className="divide-y divide-[hsl(var(--border))]">
-            {recentActivity.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 px-5 py-3.5 hover:bg-[hsl(var(--muted))] transition-colors">
-                <div className={`mt-0.5 ${item.color}`}>
-                  <Icon name={item.icon} size={14} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-[13px] text-[hsl(var(--foreground))]">{item.text}</p>
-                  <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-0.5">{item.time}</p>
-                </div>
+        <div>
+          {recentActivity.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-3 py-3.5"
+              style={{ borderBottom: "1px solid #e4dfd4" }}
+            >
+              <Icon name={item.icon} size={13} style={{ color: item.color, marginTop: "2px", flexShrink: 0 }} />
+              <div className="flex-1">
+                <p className="text-[13px]" style={{ color: "#333" }}>{item.text}</p>
+                <p className="text-[10px] mt-0.5" style={{ color: "#bbb" }}>{item.time}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       )}
 
       {activeTab === "settings" && (
-        <div className="bg-white border border-[hsl(var(--border))] rounded-lg overflow-hidden">
-          <div className="px-5 py-3 border-b border-[hsl(var(--border))]">
-            <h3 className="text-[12px] font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider">
-              Настройки
-            </h3>
-          </div>
-          <div className="divide-y divide-[hsl(var(--border))]">
-            {[
-              { label: "Email-уведомления", desc: "Получать дайджест раз в день", icon: "Mail" },
-              { label: "Уведомления в браузере", desc: "Push-уведомления о трендах", icon: "Bell" },
-              { label: "Компактный вид", desc: "Показывать больше новостей", icon: "AlignJustify" },
-              { label: "Тёмная тема", desc: "Переключить на тёмный интерфейс", icon: "Moon" },
-            ].map((setting, i) => (
-              <div key={i} className="flex items-center justify-between px-5 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[hsl(var(--muted))] flex items-center justify-center">
-                    <Icon name={setting.icon} size={14} className="text-[hsl(var(--muted-foreground))]" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-medium text-[hsl(var(--foreground))]">{setting.label}</p>
-                    <p className="text-[11px] text-[hsl(var(--muted-foreground))]">{setting.desc}</p>
-                  </div>
+        <div>
+          {settings.map((s, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between py-4"
+              style={{ borderBottom: "1px solid #e4dfd4" }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 flex items-center justify-center"
+                  style={{ backgroundColor: "#e0dace" }}
+                >
+                  <Icon name={s.icon} size={13} style={{ color: "#777" }} />
                 </div>
-                <div className="w-10 h-5 rounded-full bg-[hsl(var(--muted))] border border-[hsl(var(--border))] relative cursor-pointer hover:bg-[hsl(var(--border))] transition-colors">
-                  <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm" />
+                <div>
+                  <p className="text-[13px] font-medium" style={{ color: "#141414" }}>{s.label}</p>
+                  <p className="text-[11px]" style={{ color: "#999" }}>{s.desc}</p>
                 </div>
               </div>
-            ))}
-          </div>
+              {/* Toggle */}
+              <div
+                className="w-9 h-5 relative cursor-pointer"
+                style={{ backgroundColor: "#d4cfc4", borderRadius: "999px" }}
+              >
+                <div
+                  className="absolute left-0.5 top-0.5 w-4 h-4"
+                  style={{ backgroundColor: "#ece8df", borderRadius: "50%", boxShadow: "0 1px 2px rgba(0,0,0,0.15)" }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
