@@ -1,17 +1,49 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import Layout from "@/components/Layout";
+import CommentsPanel from "@/components/CommentsPanel";
+import HomePage from "@/pages/HomePage";
+import TrendingPage from "@/pages/TrendingPage";
+import SearchPage from "@/pages/SearchPage";
+import SavedPage from "@/pages/SavedPage";
+import ProfilePage from "@/pages/ProfilePage";
+import type { NewsItem } from "@/data/news";
 
-const Index = () => {
+export default function Index() {
+  const [activePage, setActivePage] = useState("home");
+  const [commentsItem, setCommentsItem] = useState<NewsItem | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
+
+  const handleToggleSave = (id: number) => {
+    setSavedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const sharedProps = {
+    onOpenComments: (item: NewsItem) => setCommentsItem(item),
+    savedIds,
+    onToggleSave: handleToggleSave,
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 color-black text-black">Добро пожаловать!</h1>
-        <p className="text-xl text-gray-600">тут будет отображаться ваш проект</p>
-      </div>
-      <span className="absolute bottom-8 left-1/2 -translate-x-1/2 inline-block bg-[#FF6637] text-white text-sm px-4 py-2 rounded-full whitespace-nowrap">
-        Подождите 5 минут, Юра создает первую версию проекта с нуля
-      </span>
-    </div>
-  );
-};
+    <>
+      <Layout activePage={activePage} onNavigate={setActivePage}>
+        <div className="pb-16 md:pb-0">
+          {activePage === "home" && <HomePage {...sharedProps} />}
+          {activePage === "trending" && <TrendingPage {...sharedProps} />}
+          {activePage === "search" && <SearchPage {...sharedProps} />}
+          {activePage === "saved" && <SavedPage {...sharedProps} />}
+          {activePage === "profile" && <ProfilePage savedIds={savedIds} />}
+        </div>
+      </Layout>
 
-export default Index;
+      <CommentsPanel
+        item={commentsItem}
+        onClose={() => setCommentsItem(null)}
+      />
+    </>
+  );
+}
